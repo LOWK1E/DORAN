@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const responseInput = document.getElementById('response');
     const rulesTable = document.getElementById('rules-table');
     
+    // Function to get CSRF token from meta tag
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+    
     // Add new rule
     addRuleForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -21,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
                 },
                 body: JSON.stringify({
                     keywords,
@@ -54,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken()
                         },
                         body: JSON.stringify({
                             rule_id: ruleId

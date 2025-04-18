@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const clearHistoryBtn = document.getElementById('clear-history');
     const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+    
+    // Function to get CSRF token from meta tag
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
 
     // Scroll to bottom of chat
     function scrollToBottom() {
@@ -40,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
                 },
                 body: JSON.stringify({ message }),
             });
@@ -84,6 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     const response = await fetch('/clear_history', {
                         method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
                     });
                     
                     if (response.ok) {

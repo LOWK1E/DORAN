@@ -17,7 +17,7 @@
             </div>
             <div class="card-body p-4">
                 <form method="POST" action="{{ url_for('login', user_type=user_type) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
 
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>

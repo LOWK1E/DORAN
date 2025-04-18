@@ -3,6 +3,7 @@ import logging
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf.csrf import CSRFProtect
 import json
 from datetime import datetime
 
@@ -15,6 +16,15 @@ from user_management import User, UserManager
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+
+# Initialize CSRF Protection
+csrf = CSRFProtect(app)
+
+# Exempt JSON routes from CSRF since we'll handle them with custom headers
+csrf.exempt('send_message')
+csrf.exempt('clear_history')
+csrf.exempt('add_rule')
+csrf.exempt('delete_rule')
 
 # Initialize login manager
 login_manager = LoginManager()
