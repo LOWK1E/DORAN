@@ -21,6 +21,7 @@ body {
     height: calc(100vh - 170px);
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 /* Chat messages area */
@@ -113,6 +114,15 @@ body {
 
 #rules-table td {
     vertical-align: middle;
+}
+
+/* Chat input footer */
+.card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
 }
 
 /* Responsive adjustments */

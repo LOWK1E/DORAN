@@ -68,6 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const message = userInput.value.trim();
         if (message) {
+            // Hide the welcome message when user sends a message
+            const welcomeMessage = document.querySelector('.chat-welcome');
+            if (welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+            }
+            
             addMessage(message, true);
             sendMessage(message);
             userInput.value = '';
@@ -78,6 +84,13 @@ document.addEventListener('DOMContentLoaded', function() {
     suggestionBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const message = this.textContent.trim();
+            
+            // Hide the welcome message when a suggestion is clicked
+            const welcomeMessage = document.querySelector('.chat-welcome');
+            if (welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+            }
+            
             addMessage(message, true);
             sendMessage(message);
         });
