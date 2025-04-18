@@ -3,6 +3,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
 }
 
 .footer {
@@ -16,38 +18,57 @@ body {
 }
 
 #chat-card {
-    border-radius: 10px;
+    border-radius: 16px;
     overflow: hidden;
     height: calc(100vh - 170px);
     display: flex;
     flex-direction: column;
     position: relative;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    background-color: #1e1e1e;
 }
 
 /* Chat messages area */
 .chat-messages {
-    padding: 1rem;
+    padding: 1.5rem;
     overflow-y: auto;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
+    background-color: #1e1e1e;
+    gap: 12px;
 }
 
 /* Welcome message */
 .chat-welcome {
-    background-color: rgba(var(--bs-secondary-rgb), 0.1);
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    background-color: rgba(var(--bs-dark-rgb), 0.4);
+    border-radius: 16px;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
     text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .welcome-header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .suggestion-list {
@@ -56,33 +77,49 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-top: 1rem;
+    gap: 12px;
+    margin-top: 1.2rem;
 }
 
 .suggestion-btn {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    background-color: rgba(var(--bs-primary-rgb), 0.15);
     border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
     color: var(--bs-primary);
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
+    border-radius: 24px;
+    padding: 0.6rem 1.2rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .suggestion-btn:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.2);
+    background-color: rgba(var(--bs-primary-rgb), 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Chat messages */
 .message {
     max-width: 80%;
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 15px;
+    margin-bottom: 0.8rem;
+    padding: 0.9rem 1.2rem;
+    border-radius: 18px;
     position: relative;
     word-wrap: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message-user {
@@ -94,9 +131,10 @@ body {
 
 .message-bot {
     align-self: flex-start;
-    background-color: var(--bs-dark);
+    background-color: #2a2a2a;
     color: white;
     border-bottom-left-radius: 5px;
+    border-left: 3px solid var(--bs-info);
 }
 
 .message-time {
@@ -118,11 +156,49 @@ body {
 
 /* Chat input footer */
 .card-footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     position: sticky;
     bottom: 0;
     width: 100%;
     z-index: 100;
+    background-color: #252525;
+    padding: 1rem;
+}
+
+#chat-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#user-input {
+    background-color: #2d2d2d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+#user-input:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+#chat-form button {
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+#chat-form button:hover {
+    transform: scale(1.05);
 }
 
 /* Responsive adjustments */
@@ -134,4 +210,11 @@ body {
     #chat-card {
         height: calc(100vh - 150px);
     }
+}
+
+/* Card header styling */
+.card-header {
+    background-color: #252525;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.5rem;
 }

@@ -29,13 +29,31 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Use provided timestamp or current time
         const now = timestamp || new Date().toLocaleString();
-        messageTime.textContent = now;
+        
+        // Add icon based on sender
+        const icon = document.createElement('i');
+        icon.className = isUser ? 'fas fa-user me-1' : 'fas fa-robot me-1';
+        messageTime.appendChild(icon);
+        
+        // Add timestamp text
+        const timeText = document.createTextNode(now);
+        messageTime.appendChild(timeText);
         
         messageDiv.appendChild(messageContent);
         messageDiv.appendChild(messageTime);
         
+        // Add with animation
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transform = 'translateY(20px)';
         chatMessages.appendChild(messageDiv);
-        scrollToBottom();
+        
+        // Trigger animation after a small delay
+        setTimeout(() => {
+            messageDiv.style.transition = 'all 0.3s ease-out';
+            messageDiv.style.opacity = '1';
+            messageDiv.style.transform = 'translateY(0)';
+            scrollToBottom();
+        }, 10);
     }
 
     // Send message to server and get response

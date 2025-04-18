@@ -4,9 +4,9 @@
 <div class="row chat-container">
     <div class="col-md-12">
         <div class="card border-0 shadow-lg" id="chat-card">
-            <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="mb-0 fs-5">
-                    <i class="fas fa-robot me-2"></i>
+                    <i class="fas fa-robot me-2 text-info"></i>
                     DORAN Chatbot
                     {% if role == 'admin' %}
                     <span class="badge bg-danger ms-2">Admin</span>
@@ -28,11 +28,11 @@
                 <div class="chat-messages" id="chat-messages">
                     <div class="chat-welcome">
                         <div class="welcome-header">
-                            <i class="fas fa-robot mb-2 text-primary" style="font-size: 2rem;"></i>
-                            <h4>Welcome to DORAN!</h4>
+                            <i class="fas fa-robot mb-3 text-info" style="font-size: 2.5rem;"></i>
+                            <h4 class="mb-3">Welcome to DORAN!</h4>
                         </div>
-                        <p>Hello, {{ username }}! I'm DORAN, your virtual assistant for SOICT-related queries.</p>
-                        <p>You can ask me questions like:</p>
+                        <p class="lead mb-1">Hello, {{ username }}! I'm DORAN, your virtual assistant for SOICT-related queries.</p>
+                        <p class="mb-3">You can ask me questions like:</p>
                         <ul class="suggestion-list">
                             <li><button class="suggestion-btn">What are SOICT office hours?</button></li>
                             <li><button class="suggestion-btn">Where is the SOICT office?</button></li>
@@ -47,17 +47,24 @@
                                 <div class="message-content">
                                     {{ message.message }}
                                 </div>
-                                <div class="message-time">{{ message.timestamp }}</div>
+                                <div class="message-time">
+                                    {% if message.sender == 'user' %}
+                                        <i class="fas fa-user me-1"></i>
+                                    {% else %}
+                                        <i class="fas fa-robot me-1"></i>
+                                    {% endif %}
+                                    {{ message.timestamp }}
+                                </div>
                             </div>
                         {% endfor %}
                     {% endif %}
                 </div>
             </div>
-            <div class="card-footer p-2 bg-dark">
+            <div class="card-footer">
                 <form id="chat-form" class="d-flex">
                     <input type="text" id="user-input" class="form-control me-2" placeholder="Type your message here..." autocomplete="off">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="fas fa-paper-plane me-1"></i> Send
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </form>
             </div>
