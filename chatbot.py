@@ -1,14 +1,17 @@
-import re
-import nltk
 import logging
-from nltk.tokenize import word_tokenize
+import string
+import re
 from uuid import uuid4
 
-# Download NLTK data
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+# Simple tokenizer function
+def simple_tokenize(text):
+    """Split text into tokens by whitespace and punctuation"""
+    # Convert to lowercase
+    text = text.lower()
+    # Remove punctuation
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    # Split by whitespace
+    return text.split()
 
 class Chatbot:
     def __init__(self):
@@ -54,7 +57,7 @@ class Chatbot:
         
         # Preprocess user input
         user_input = user_input.lower()
-        tokens = word_tokenize(user_input)
+        tokens = simple_tokenize(user_input)
         
         # Check each rule for keyword matches
         best_match = None
