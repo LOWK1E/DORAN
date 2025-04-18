@@ -1,0 +1,127 @@
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Chat container */
+.chat-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#chat-card {
+    border-radius: 10px;
+    overflow: hidden;
+    height: calc(100vh - 170px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Chat messages area */
+.chat-messages {
+    padding: 1rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Welcome message */
+.chat-welcome {
+    background-color: rgba(var(--bs-secondary-rgb), 0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.welcome-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.suggestion-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.suggestion-btn {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+    color: var(--bs-primary);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.suggestion-btn:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+/* Chat messages */
+.message {
+    max-width: 80%;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 15px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message-user {
+    align-self: flex-end;
+    background-color: var(--bs-primary);
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.message-bot {
+    align-self: flex-start;
+    background-color: var(--bs-dark);
+    color: white;
+    border-bottom-left-radius: 5px;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+/* Admin page */
+.keyword-badge {
+    font-size: 0.8rem;
+    font-weight: normal;
+}
+
+#rules-table td {
+    vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .message {
+        max-width: 90%;
+    }
+    
+    #chat-card {
+        height: calc(100vh - 150px);
+    }
+}
