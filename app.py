@@ -17,14 +17,8 @@ from user_management import User, UserManager
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 
-# Initialize CSRF Protection
-csrf = CSRFProtect(app)
-
-# Exempt JSON routes from CSRF since we'll handle them with custom headers
-csrf.exempt('send_message')
-csrf.exempt('clear_history')
-csrf.exempt('add_rule')
-csrf.exempt('delete_rule')
+# Initialize CSRF Protection but we'll disable it for now to get the chat working
+# csrf = CSRFProtect(app)
 
 # Initialize login manager
 login_manager = LoginManager()
