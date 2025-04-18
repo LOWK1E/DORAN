@@ -2,6 +2,7 @@ import logging
 import string
 import re
 from uuid import uuid4
+import soict  # Import the SOICT knowledge base
 
 # Simple tokenizer function
 def simple_tokenize(text):
@@ -23,7 +24,17 @@ class Chatbot:
             "I couldn't find a match for your query. Please try using different keywords."
         ]
         self.fallback_index = 0
-        logging.debug("Chatbot initialized")
+        
+        # Load rules from soict.py
+        for rule in soict.get_all_rules():
+            rule_id = str(uuid4())
+            self.rules.append({
+                'id': rule_id,
+                'keywords': rule["keywords"],
+                'response': rule["response"]
+            })
+            
+        logging.debug("Chatbot initialized with rules from soict.py")
     
     def add_rule(self, keywords, response):
         """Add a new rule to the chatbot's knowledge base"""
@@ -33,16 +44,30 @@ class Chatbot:
             'keywords': keywords,
             'response': response
         })
+        
+        # Also add to soict.py for persistence
+        soict.add_rule(keywords, response)
+        
         logging.debug(f"Added rule: {keywords} -> {response}")
         return rule_id
     
     def delete_rule(self, rule_id):
         """Delete a rule by its ID"""
+        # Find the rule in our internal list
         for i, rule in enumerate(self.rules):
             if rule['id'] == rule_id:
+                keywords = rule['keywords']
                 del self.rules[i]
+                
+                # Find and delete the matching rule in soict.py
+                for j, soict_rule in enumerate(soict.get_all_rules()):
+                    if soict_rule['keywords'] == keywords:
+                        soict.delete_rule(soict_rule['id'])
+                        break
+                
                 logging.debug(f"Deleted rule: {rule_id}")
                 return True
+                
         logging.debug(f"Rule not found for deletion: {rule_id}")
         return False
     

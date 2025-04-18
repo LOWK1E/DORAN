@@ -40,10 +40,10 @@ body:has(.chat-container) .footer {
 
 #chat-card {
     border-radius: 0;
-    overflow: hidden;
-    height: calc(100vh - 56px); /* Height minus navbar height */
+    overflow: auto; /* Allow scrolling for overflow */
+    height: calc(100vh - 70px); /* Responsive height */
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Stack children vertically */
     position: relative;
     border: none;
     box-shadow: none;
@@ -54,11 +54,11 @@ body:has(.chat-container) .footer {
 /* Chat messages area */
 .chat-messages {
     padding: 1.5rem;
-    overflow-y: auto;
-    flex-grow: 1;
+    overflow-y: auto; /* Allow vertical scrolling */
+    flex-grow: 1; /* Allow this area to grow and take available space */
     display: flex;
-    flex-direction: column;
-    height: 100%;
+    flex-direction: column; /* Stack messages vertically */
+    height: 100%; /* Ensure it takes full height of the parent */
     background-color: #1e1e1e;
     gap: 12px;
 }
@@ -179,7 +179,7 @@ body:has(.chat-container) .footer {
 /* Chat input footer */
 .card-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    position: sticky;
+    position: sticky; /* Keep it at the bottom */
     bottom: 0;
     width: 100%;
     z-index: 100;

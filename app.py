@@ -27,18 +27,7 @@ login_manager.login_view = 'login'
 
 # Initialize user manager and chatbot
 user_manager = UserManager()
-chatbot = Chatbot()
-
-# Add some default rules to the chatbot
-chatbot.add_rule(['soict', 'office', 'hour'], "SOICT office hours are from 8:00 AM to 5:00 PM, Monday to Friday.")
-chatbot.add_rule(['where', 'soict', 'office'], "The SOICT office is located in Building C1, 2nd floor.")
-chatbot.add_rule(['dean', 'soict'], "The current Dean of SOICT is Prof. Dr. Nguyen Thanh Thuy.")
-chatbot.add_rule(['courses', 'offered'], "SOICT offers various courses including Computer Science, Information Systems, and Software Engineering.")
-chatbot.add_rule(['admission', 'requirements'], "Admission requirements include a high school diploma and passing the entrance exam.")
-chatbot.add_rule(['contact', 'information'], "You can contact SOICT via email at soict@example.com or phone at +123-456-7890.")
-chatbot.add_rule(['hello', 'hi'], "Hello! I'm DORAN, a chatbot designed to help you with SOICT-related queries.")
-chatbot.add_rule(['thank', 'thanks'], "You're welcome! Is there anything else I can help you with?")
-chatbot.add_rule(['bye', 'goodbye'], "Goodbye! Feel free to come back if you have more questions.")
+chatbot = Chatbot()  # Rules are now loaded from soict.py automatically
 
 @login_manager.user_loader
 def load_user(user_id):

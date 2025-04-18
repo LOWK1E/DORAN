@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const clearHistoryBtn = document.getElementById('clear-history');
     const suggestionBtns = document.querySelectorAll('.suggestion-btn');
-    
+
     // Function to get CSRF token from meta tag
     function getCsrfToken() {
         return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -12,56 +12,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Scroll to bottom of chat
     function scrollToBottom() {
-        // Ensure smooth scrolling to the bottom
-        chatMessages.scrollTo({
-            top: chatMessages.scrollHeight,
-            behavior: 'smooth'
-        });
-        
-        // Double-check scrolling after a short delay to ensure content is loaded
-        setTimeout(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 100);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
     }
 
     // Add a message to the chat
-    function addMessage(message, isUser = false, timestamp = null) {
+    function addMessage(message, isUser  = false, timestamp = null) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
-        
+        messageDiv.className = `message ${isUser  ? 'message-user' : 'message-bot'}`;
+
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
         messageContent.textContent = message;
-        
+
         const messageTime = document.createElement('div');
         messageTime.className = 'message-time';
-        
+
         // Use provided timestamp or current time
         const now = timestamp || new Date().toLocaleString();
-        
+
         // Add icon based on sender
         const icon = document.createElement('i');
-        icon.className = isUser ? 'fas fa-user me-1' : 'fas fa-robot me-1';
+        icon.className = isUser  ? 'fas fa-user me-1' : 'fas fa-robot me-1';
         messageTime.appendChild(icon);
-        
+
         // Add timestamp text
         const timeText = document.createTextNode(now);
         messageTime.appendChild(timeText);
-        
+
         messageDiv.appendChild(messageContent);
         messageDiv.appendChild(messageTime);
-        
+
         // Add with animation
         messageDiv.style.opacity = '0';
         messageDiv.style.transform = 'translateY(20px)';
         chatMessages.appendChild(messageDiv);
-        
+
         // Trigger animation after a small delay
         setTimeout(() => {
             messageDiv.style.transition = 'all 0.3s ease-out';
             messageDiv.style.opacity = '1';
             messageDiv.style.transform = 'translateY(0)';
-            scrollToBottom();
+            scrollToBottom(); // Scroll to bottom after adding the message
         }, 10);
     }
 
@@ -76,13 +67,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ message }),
             });
-            
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            
+
             const data = await response.json();
             addMessage(data.response, false, data.timestamp);
+            scrollToBottom(); // Scroll to bottom after the bot's response is added
         } catch (error) {
             console.error('Error:', error);
             addMessage('Sorry, there was an error processing your request. Please try again.', false);
@@ -92,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle form submission
     chatForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const message = userInput.value.trim();
         if (message) {
             // Hide the welcome message when user sends a message
@@ -100,10 +92,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (welcomeMessage) {
                 welcomeMessage.style.display = 'none';
             }
-            
-            addMessage(message, true);
-            sendMessage(message);
-            userInput.value = '';
+
+            addMessage(message, true); // Add user message
+            sendMessage(message); // Send message to server
+            userInput.value = ''; // Clear input
         }
     });
 
@@ -111,15 +103,15 @@ document.addEventListener('DOMContentLoaded', function() {
     suggestionBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const message = this.textContent.trim();
-            
+
             // Hide the welcome message when a suggestion is clicked
             const welcomeMessage = document.querySelector('.chat-welcome');
             if (welcomeMessage) {
                 welcomeMessage.style.display = 'none';
             }
-            
-            addMessage(message, true);
-            sendMessage(message);
+
+            addMessage(message, true); // Add user message
+            sendMessage(message); // Send message to server
         });
     });
 
@@ -134,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             'X-CSRFToken': getCsrfToken()
                         }
                     });
-                    
+
                     if (response.ok) {
                         // Remove all messages except the welcome message
                         const welcomeMessage = document.querySelector('.chat-welcome');
