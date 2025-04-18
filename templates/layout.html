@@ -42,7 +42,7 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="{% if request.endpoint == 'chat' %}container-fluid p-0{% else %}container mt-4{% endif %}">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}

@@ -5,28 +5,50 @@ body {
     flex-direction: column;
     background-color: var(--bs-dark);
     color: var(--bs-light);
+    overflow-x: hidden;
+}
+
+.container-fluid.p-0 {
+    margin-top: -1.5rem; /* Remove space after navbar for chat page */
 }
 
 .footer {
     margin-top: auto;
 }
 
+/* Hide footer on chat page for full height */
+body:has(.chat-container) .footer {
+    display: none;
+}
+
 /* Chat container */
 .chat-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.row.chat-container {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.chat-container .col-md-12 {
+    padding: 0;
 }
 
 #chat-card {
-    border-radius: 16px;
+    border-radius: 0;
     overflow: hidden;
-    height: calc(100vh - 170px);
+    height: calc(100vh - 56px); /* Height minus navbar height */
     display: flex;
     flex-direction: column;
     position: relative;
     border: none;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
     background-color: #1e1e1e;
+    margin-bottom: 0;
 }
 
 /* Chat messages area */

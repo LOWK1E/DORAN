@@ -12,7 +12,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Scroll to bottom of chat
     function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Ensure smooth scrolling to the bottom
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        // Double-check scrolling after a short delay to ensure content is loaded
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
     }
 
     // Add a message to the chat
