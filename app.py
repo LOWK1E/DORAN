@@ -43,6 +43,8 @@ def login(user_type):
         username = request.form.get('username')
         password = request.form.get('password')
         
+        logging.debug(f"Login attempt for {user_type}: {username}")
+        
         if user_type == 'guest':
             # For guest users, create a temporary session without login
             session['guest_username'] = username
@@ -51,6 +53,14 @@ def login(user_type):
         
         # For admin and regular users
         user = user_manager.get_user_by_username(username)
+        
+        if user:
+            logging.debug(f"Found user: {username}, role: {user.role}")
+            password_matches = check_password_hash(user.password_hash, password)
+            logging.debug(f"Password match: {password_matches}")
+            logging.debug(f"Role match needed: {user_type}, actual: {user.role}")
+        else:
+            logging.debug(f"User not found: {username}")
         
         # If user doesn't exist and it's a new user registration
         if not user and user_type == 'user':

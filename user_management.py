@@ -18,10 +18,18 @@ class UserManager:
         self.chat_history = {}
         self.next_user_id = 1
         
-        # Create default admin user
-        self.create_user("admin", "admin123", "admin")
+        # Create default admin user - with debug output
+        admin_user = self.create_user("admin", "admin123", "admin")
+        logging.debug(f"Created default admin user with ID: {admin_user.id}, username: {admin_user.username}, role: {admin_user.role}")
         
-        logging.debug("UserManager initialized with default admin user")
+        # Debug check for verification
+        check_admin = self.get_user_by_username("admin")
+        if check_admin:
+            logging.debug(f"Verified admin user exists with ID: {check_admin.id}, role: {check_admin.role}")
+        else:
+            logging.error("Failed to create admin user!")
+            
+        logging.debug(f"User database now contains {len(self.users)} users")
     
     def create_user(self, username, password, role):
         """Create a new user and store it in memory"""
