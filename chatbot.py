@@ -15,8 +15,12 @@ import database.user_database.rule_utils as rule_utils
 import json
 import os
 
-from nlp_utils import sentence_model, semantic_similarity
-from sentence_transformers import util
+from nlp_utils import sentence_model, semantic_similarity, SENTENCE_TRANSFORMERS_AVAILABLE
+try:
+    from sentence_transformers import util
+    SENTENCE_TRANSFORMERS_UTIL_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_UTIL_AVAILABLE = False
 
 class Chatbot:
     def __init__(self):
@@ -66,17 +70,19 @@ class Chatbot:
         # Load visual-based rules from visuals.json
         self.visual_rules = self.get_visual_rules()
 
-        # Precompute embeddings for user rules
+        # Precompute embeddings for user rules if available
         self.user_rule_embeddings = []
-        for rule in self.rules:
-            emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
-            self.user_rule_embeddings.append((rule['question'], emb, rule))
+        if SENTENCE_TRANSFORMERS_AVAILABLE and sentence_model:
+            for rule in self.rules:
+                emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
+                self.user_rule_embeddings.append((rule['question'], emb, rule))
 
-        # Precompute embeddings for guest rules
+        # Precompute embeddings for guest rules if available
         self.guest_rule_embeddings = []
-        for rule in self.guest_rules:
-            emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
-            self.guest_rule_embeddings.append((rule['question'], emb, rule))
+        if SENTENCE_TRANSFORMERS_AVAILABLE and sentence_model:
+            for rule in self.guest_rules:
+                emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
+                self.guest_rule_embeddings.append((rule['question'], emb, rule))
 
         # Email keywords for triggering email search
         self.email_keywords = ["email", "contact", "mail", "reach", "address", "send", "message"]
@@ -98,6 +104,9 @@ class Chatbot:
         """
         Recompute embeddings for user and guest rules after rules are modified.
         """
+        if not SENTENCE_TRANSFORMERS_AVAILABLE or sentence_model is None:
+            return
+        
         # Recompute user rule embeddings
         self.user_rule_embeddings = []
         for rule in self.rules:
@@ -511,13 +520,14 @@ class Chatbot:
                                 best_similarity = matches
                                 best_match = rule
 
-        # Then, check semantic rules
-        query_emb = sentence_model.encode(user_input, convert_to_tensor=True)
-        for q, emb, r in embeddings_to_use:
-            similarity = util.cos_sim(query_emb, emb)[0][0].item()
-            if similarity > best_similarity and similarity >= 0.8:
-                best_similarity = similarity
-                best_match = r
+        # Then, check semantic rules if available
+        if SENTENCE_TRANSFORMERS_AVAILABLE and SENTENCE_TRANSFORMERS_UTIL_AVAILABLE and sentence_model and embeddings_to_use:
+            query_emb = sentence_model.encode(user_input, convert_to_tensor=True)
+            for q, emb, r in embeddings_to_use:
+                similarity = util.cos_sim(query_emb, emb)[0][0].item()
+                if similarity > best_similarity and similarity >= 0.8:
+                    best_similarity = similarity
+                    best_match = r
 
         if best_match:
             self.consecutive_fallbacks = 0
@@ -533,13 +543,14 @@ class Chatbot:
         questions = [item['question'] for item in self.faqs]
         answers = [item['answer'] for item in self.faqs]
 
-        # Try faqs retrieval
-        best_question, similarity_score = semantic_similarity(user_input, questions)
-        SIMILARITY_THRESHOLD = 0.8
-        if similarity_score >= SIMILARITY_THRESHOLD:
-            index = questions.index(best_question)
-            response = answers[index]
-            return self.append_image_to_response(response)
+        # Try faqs retrieval if semantic similarity is available
+        if SENTENCE_TRANSFORMERS_AVAILABLE:
+            best_question, similarity_score = semantic_similarity(user_input, questions)
+            SIMILARITY_THRESHOLD = 0.8
+            if similarity_score >= SIMILARITY_THRESHOLD:
+                index = questions.index(best_question)
+                response = answers[index]
+                return self.append_image_to_response(response)
 
         # Fallback responses if no match found
         self.consecutive_fallbacks += 1
@@ -608,8 +619,9 @@ class Chatbot:
                 self.rules = self.get_rules()
             if user_type == 'guest' or user_type == 'both':
                 self.guest_rules = self.get_guest_rules()
-            # Recompute embeddings after adding rules
-            self.recompute_embeddings()
+            # Recompute embeddings after adding rules if available
+            if SENTENCE_TRANSFORMERS_AVAILABLE:
+                self.recompute_embeddings()
             return {"user": added_id} if user_type == "user" else {"guest": added_id}
 
     def save_location_rules(self):
@@ -628,7 +640,7 @@ class Chatbot:
                 url = url_match.group(1) if url_match else ""
                 # Remove /static/ prefix if present
                 if url.startswith("/static/"):
-                    url = url[len("/static/"):]
+                    url = url[len("/static/"): ]
                 # Extract description (text before <br>)
                 description = rule.get("response", "").split("<br>")[0]
                 locations_data.append({
@@ -660,7 +672,7 @@ class Chatbot:
                 urls = []
                 for img_url in img_matches:
                     if img_url.startswith("/static/"):
-                        img_url = img_url[len("/static/"):]
+                        img_url = img_url[len("/static/"): ]
                     urls.append(img_url)
                 # Primary url
                 url = urls[0] if urls else ""
@@ -712,8 +724,9 @@ class Chatbot:
                     deleted = rule_utils.delete_rule(rule_id, user_type='user', category=category)
                     # Reload rules
                     self.rules = self.get_rules()
-                    # Recompute embeddings after deleting rules
-                    self.recompute_embeddings()
+                    # Recompute embeddings after deleting rules if available
+                    if SENTENCE_TRANSFORMERS_AVAILABLE:
+                        self.recompute_embeddings()
                     logging.debug(f"Rule with id {rule_id} deleted from user rules.")
                     return deleted
         else:
@@ -743,8 +756,9 @@ class Chatbot:
                     from database.user_database import rule_utils
                     deleted = rule_utils.delete_rule(rule_id, user_type='guest', category=category)
                     self.guest_rules = self.get_guest_rules()
-                    # Recompute embeddings after deleting rules
-                    self.recompute_embeddings()
+                    # Recompute embeddings after deleting rules if available
+                    if SENTENCE_TRANSFORMERS_AVAILABLE:
+                        self.recompute_embeddings()
                     logging.debug(f"Rule with id {rule_id} deleted from guest rules.")
                     return deleted
 
@@ -796,8 +810,9 @@ class Chatbot:
                 # Update in-memory rule
                 rule["question"] = question
                 rule["response"] = response
-                # Recompute embeddings after editing rules
-                self.recompute_embeddings()
+                # Recompute embeddings after editing rules if available
+                if SENTENCE_TRANSFORMERS_AVAILABLE:
+                    self.recompute_embeddings()
                 break
 
         if not edited:
@@ -874,7 +889,3 @@ class Chatbot:
                 }
         except Exception as e:
             logging.error(f"Error updating CATEGORY_FILES: {e}")
-
-
-
-
