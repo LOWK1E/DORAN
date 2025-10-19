@@ -54,6 +54,15 @@ with app.app_context():
         db.create_all()
         app.logger.info("Database tables created successfully")
         user_manager = UserManager(db)
+
+        # Create default admin user if not exists
+        if not Admin.query.filter_by(email='admin@wvsu.edu.ph').first():
+            from werkzeug.security import generate_password_hash
+            admin = Admin(email='admin@wvsu.edu.ph', password_hash=generate_password_hash('admin123'))
+            db.session.add(admin)
+            db.session.commit()
+            app.logger.info("Default admin user created: admin@wvsu.edu.ph / admin123")
+
     except Exception as e:
         app.logger.error(f"Database initialization failed: {str(e)}. App will run without database features.")
         user_manager = None
