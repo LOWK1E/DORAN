@@ -377,19 +377,23 @@ function closeCategoryModal(redirectUrl) {
 
   function setActive(button) {
     // remove active from both
-    userBtn.classList.remove('active');
-    guestBtn.classList.remove('active');
-    
+    if (userBtn) userBtn.classList.remove('active');
+    if (guestBtn) guestBtn.classList.remove('active');
+
     // add active to the clicked one
     button.classList.add('active');
   }
 
-  userBtn.addEventListener('click', () => {
-    setActive(userBtn);
-    // your logic to show user rules
-  });
+  if (userBtn) {
+    userBtn.addEventListener('click', () => {
+      setActive(userBtn);
+      // your logic to show user rules
+    });
+  }
 
-  guestBtn.addEventListener('click', () => {
-    setActive(guestBtn);
-    // your logic to show guest rules
-  });
+  if (guestBtn) {
+    guestBtn.addEventListener('click', () => {
+      setActive(guestBtn);
+      // your logic to show guest rules
+    });
+  }
