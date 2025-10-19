@@ -1092,6 +1092,82 @@ def admin_emails():
 
     return render_template('admin_emails.html', emails=emails)
 
+@app.route('/add_rule', methods=['POST'])
+@login_required
+def add_rule():
+    """
+    Add a new rule.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    data = request.get_json()
+    question = data.get('keywords', '').strip()  # JS sends 'keywords' as question
+    response = data.get('response', '').strip()
+    user_type = data.get('user_type', 'user')
+    category = data.get('category', 'soict')
+
+    if not question or not response:
+        return jsonify({'status': 'error', 'message': 'Question and response are required'})
+
+    try:
+        added_id = chatbot.add_rule(question, response, user_type=user_type, category=category)
+        return jsonify({'status': 'success', 'id': added_id})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/edit_rule', methods=['POST'])
+@login_required
+def edit_rule():
+    """
+    Edit an existing rule.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    data = request.get_json()
+    rule_id = data.get('rule_id')
+    question = data.get('keywords', '').strip()
+    response = data.get('response', '').strip()
+    user_type = data.get('user_type', 'user')
+
+    if not rule_id or not question or not response:
+        return jsonify({'status': 'error', 'message': 'Rule ID, question, and response are required'})
+
+    try:
+        edited = chatbot.edit_rule(rule_id, question, response, user_type=user_type)
+        if edited:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Rule not found'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/delete_rule', methods=['POST'])
+@login_required
+def delete_rule():
+    """
+    Delete a rule.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    data = request.get_json()
+    rule_id = data.get('rule_id')
+    user_type = data.get('user_type', 'user')
+
+    if not rule_id:
+        return jsonify({'status': 'error', 'message': 'Rule ID is required'})
+
+    try:
+        deleted = chatbot.delete_rule(rule_id, user_type=user_type)
+        if deleted:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Rule not found'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
 @app.route('/add_category', methods=['POST'])
 @login_required
 def add_category():
