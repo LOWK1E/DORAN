@@ -15,12 +15,7 @@ import database.user_database.rule_utils as rule_utils
 import json
 import os
 
-from nlp_utils import sentence_model, semantic_similarity, SENTENCE_TRANSFORMERS_AVAILABLE
-try:
-    from sentence_transformers import util
-    SENTENCE_TRANSFORMERS_UTIL_AVAILABLE = True
-except ImportError:
-    SENTENCE_TRANSFORMERS_UTIL_AVAILABLE = False
+from nlp_utils import semantic_similarity
 
 class Chatbot:
     def __init__(self):
@@ -70,19 +65,11 @@ class Chatbot:
         # Load visual-based rules from visuals.json
         self.visual_rules = self.get_visual_rules()
 
-        # Precompute embeddings for user rules if available
+        # Precompute embeddings for user rules if available (removed for NLTK)
         self.user_rule_embeddings = []
-        if SENTENCE_TRANSFORMERS_AVAILABLE and sentence_model:
-            for rule in self.rules:
-                emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
-                self.user_rule_embeddings.append((rule['question'], emb, rule))
 
-        # Precompute embeddings for guest rules if available
+        # Precompute embeddings for guest rules if available (removed for NLTK)
         self.guest_rule_embeddings = []
-        if SENTENCE_TRANSFORMERS_AVAILABLE and sentence_model:
-            for rule in self.guest_rules:
-                emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
-                self.guest_rule_embeddings.append((rule['question'], emb, rule))
 
         # Email keywords for triggering email search
         self.email_keywords = ["email", "contact", "mail", "reach", "address", "send", "message"]
@@ -100,37 +87,7 @@ class Chatbot:
             "Apologies, I couldn't find an answer. Could you ask something else?"
         ]
 
-    def recompute_embeddings(self):
-        """
-        Recompute embeddings for user and guest rules after rules are modified.
-        """
-        if not SENTENCE_TRANSFORMERS_AVAILABLE or sentence_model is None:
-            return
-        
-        # Recompute user rule embeddings
-        self.user_rule_embeddings = []
-        for rule in self.rules:
-            emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
-            self.user_rule_embeddings.append((rule['question'], emb, rule))
 
-        # Recompute guest rule embeddings
-        self.guest_rule_embeddings = []
-        for rule in self.guest_rules:
-            emb = sentence_model.encode(rule['question'], convert_to_tensor=True)
-            self.guest_rule_embeddings.append((rule['question'], emb, rule))
-
-        # Load FAQs
-        with open('database/faqs.json', 'r', encoding='utf-8') as f:
-            self.faqs = json.load(f)
-
-        # Initialize fallback tracking attributes
-        self.consecutive_fallbacks = 0
-        self.fallback_index = 0
-        self.fallback_responses = [
-            "I'm sorry, I didn't quite get that. Could you please rephrase?",
-            "Hmm, I'm not sure I understand. Can you try asking differently?",
-            "Apologies, I couldn't find an answer. Could you ask something else?"
-        ]
 
     def search_emails(self, user_input):
         """
@@ -520,14 +477,7 @@ class Chatbot:
                                 best_similarity = matches
                                 best_match = rule
 
-        # Then, check semantic rules if available
-        if SENTENCE_TRANSFORMERS_AVAILABLE and SENTENCE_TRANSFORMERS_UTIL_AVAILABLE and sentence_model and embeddings_to_use:
-            query_emb = sentence_model.encode(user_input, convert_to_tensor=True)
-            for q, emb, r in embeddings_to_use:
-                similarity = util.cos_sim(query_emb, emb)[0][0].item()
-                if similarity > best_similarity and similarity >= 0.8:
-                    best_similarity = similarity
-                    best_match = r
+        # Semantic rules not used with NLTK
 
         if best_match:
             self.consecutive_fallbacks = 0
@@ -543,14 +493,13 @@ class Chatbot:
         questions = [item['question'] for item in self.faqs]
         answers = [item['answer'] for item in self.faqs]
 
-        # Try faqs retrieval if semantic similarity is available
-        if SENTENCE_TRANSFORMERS_AVAILABLE:
-            best_question, similarity_score = semantic_similarity(user_input, questions)
-            SIMILARITY_THRESHOLD = 0.8
-            if similarity_score >= SIMILARITY_THRESHOLD:
-                index = questions.index(best_question)
-                response = answers[index]
-                return self.append_image_to_response(response)
+        # Try faqs retrieval using semantic similarity
+        best_question, similarity_score = semantic_similarity(user_input, questions)
+        SIMILARITY_THRESHOLD = 0.8
+        if similarity_score >= SIMILARITY_THRESHOLD:
+            index = questions.index(best_question)
+            response = answers[index]
+            return self.append_image_to_response(response)
 
         # Fallback responses if no match found
         self.consecutive_fallbacks += 1
@@ -620,8 +569,7 @@ class Chatbot:
             if user_type == 'guest' or user_type == 'both':
                 self.guest_rules = self.get_guest_rules()
             # Recompute embeddings after adding rules if available
-            if SENTENCE_TRANSFORMERS_AVAILABLE:
-                self.recompute_embeddings()
+            # (No embeddings used with NLTK)
             return {"user": added_id} if user_type == "user" else {"guest": added_id}
 
     def save_location_rules(self):
@@ -725,8 +673,7 @@ class Chatbot:
                     # Reload rules
                     self.rules = self.get_rules()
                     # Recompute embeddings after deleting rules if available
-                    if SENTENCE_TRANSFORMERS_AVAILABLE:
-                        self.recompute_embeddings()
+                    # (No embeddings used with NLTK)
                     logging.debug(f"Rule with id {rule_id} deleted from user rules.")
                     return deleted
         else:
@@ -757,8 +704,7 @@ class Chatbot:
                     deleted = rule_utils.delete_rule(rule_id, user_type='guest', category=category)
                     self.guest_rules = self.get_guest_rules()
                     # Recompute embeddings after deleting rules if available
-                    if SENTENCE_TRANSFORMERS_AVAILABLE:
-                        self.recompute_embeddings()
+                    # (No embeddings used with NLTK)
                     logging.debug(f"Rule with id {rule_id} deleted from guest rules.")
                     return deleted
 
@@ -811,8 +757,7 @@ class Chatbot:
                 rule["question"] = question
                 rule["response"] = response
                 # Recompute embeddings after editing rules if available
-                if SENTENCE_TRANSFORMERS_AVAILABLE:
-                    self.recompute_embeddings()
+                # (No embeddings used with NLTK)
                 break
 
         if not edited:
@@ -858,6 +803,12 @@ class Chatbot:
         Reload visual rules from database/visuals/visuals.json into memory.
         """
         self.visual_rules = self.get_visual_rules()
+
+    def recompute_embeddings(self):
+        """
+        Dummy method for compatibility. Does nothing since sentence transformers are not used.
+        """
+        pass
 
     def create_category_files(self, category):
         """
