@@ -8,3 +8,5 @@ gunicorn==21.2.0
 sentence-transformers
 google-generativeai
 pandas>=2.2.0
+torch==2.9.0
+transformers==4.57.1
