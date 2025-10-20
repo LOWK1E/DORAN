@@ -4,6 +4,9 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
+# Copy requirements first for better caching
+COPY requirements.txt .
+
 # Install system dependencies, Python packages, download NLTK data, and initialize database in one layer for faster build
 RUN apt-get update && apt-get install -y \
     gcc \
