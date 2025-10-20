@@ -477,21 +477,32 @@ class Chatbot:
                                 best_similarity = matches
                                 best_match = rule
 
+        # Semantic rules not used with NLTK
+
         if best_match:
             self.consecutive_fallbacks = 0
             return self.append_image_to_response(best_match['response'])
 
-        # Check regular rules (user/guest rules) with semantic similarity
+        # Check regular rules (user/guest rules) with keyword matching - all keywords must be present
         regular_rules = [rule for rule in rules_to_use if rule.get('category') not in ['locations', 'visuals']]
         if regular_rules:
-            questions = [rule['question'] for rule in regular_rules]
+            tokens = simple_tokenize(user_input.lower())
+            best_match = None
+            best_match_score = 0
 
-            # Use semantic similarity to find the best match
-            best_question, similarity_score = semantic_similarity(user_input, questions)
-            SIMILARITY_THRESHOLD = 0.6  # Threshold for matching
-            if similarity_score >= SIMILARITY_THRESHOLD:
-                index = questions.index(best_question)
-                best_match = regular_rules[index]
+            for rule in regular_rules:
+                question = rule['question'].lower()
+                question_tokens = simple_tokenize(question)
+
+                # Check if all question tokens are present in user input
+                if all(token in tokens for token in question_tokens):
+                    # Calculate match score based on number of matching tokens
+                    match_score = len(question_tokens)
+                    if match_score > best_match_score:
+                        best_match_score = match_score
+                        best_match = rule
+
+            if best_match:
                 self.consecutive_fallbacks = 0
                 return self.append_image_to_response(best_match['response'])
 

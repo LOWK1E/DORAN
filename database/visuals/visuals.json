@@ -14,7 +14,7 @@
             "uploads/locations/2a50c2935e0b42e88562e6ef92af9772_Enrollment_Req.jpg"
         ],
         "url": "uploads/locations/2a50c2935e0b42e88562e6ef92af9772_Enrollment_Req.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "ce6ef2b8-3200-4eac-a929-9eca9e9f1973",
@@ -111,7 +111,7 @@
             "uploads/locations/749f919979ca4052ab5f52b2cd740229_Associate_prof_2.jpg"
         ],
         "url": "uploads/locations/749f919979ca4052ab5f52b2cd740229_Associate_prof_2.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "380cd5bd-918d-48dd-ac3e-a0181b02b6bd",
@@ -131,7 +131,7 @@
             "uploads/locations/b2427464fd8640f4b316b0c9cb7e439a_Associate_prof_4.jpg"
         ],
         "url": "uploads/locations/b2427464fd8640f4b316b0c9cb7e439a_Associate_prof_4.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "a13a46d1-747d-4d1b-b87a-6041d5d4e881",
@@ -157,7 +157,7 @@
             "uploads/locations/d3cc42310bbd485dbc74fe5874300321_Associate_prof_5.jpg"
         ],
         "url": "uploads/locations/d3cc42310bbd485dbc74fe5874300321_Associate_prof_5.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "ddcf07df-4c97-4f40-b524-e83a17752b5e",
@@ -186,7 +186,7 @@
             "uploads/locations/8ad5873e6c714904b3ab2b36ffc6557f_Associate_prof_five.jpg"
         ],
         "url": "uploads/locations/8ad5873e6c714904b3ab2b36ffc6557f_Associate_prof_five.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "6a19765c-9eaf-4ccf-bc43-b1c1e9b79148",
@@ -206,7 +206,7 @@
             "uploads/locations/5d9f9bf1ae7a4618878017d31bb2f234_Associate_prof_II.jpg"
         ],
         "url": "uploads/locations/5d9f9bf1ae7a4618878017d31bb2f234_Associate_prof_II.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "9fc42aa4-7bac-48f6-889f-db1d5e362a1c",
@@ -230,7 +230,7 @@
             "uploads/locations/8f7fd31af11b4525b852224c1361b113_Associate_prof_IV.jpg"
         ],
         "url": "uploads/locations/8f7fd31af11b4525b852224c1361b113_Associate_prof_IV.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "45ab968d-b9e0-4c6a-b125-0749b230dbb1",
@@ -250,7 +250,7 @@
             "uploads/locations/326fb623a3f14174a82b9a02ff90ad1f_Associate_prof_one.jpg"
         ],
         "url": "uploads/locations/326fb623a3f14174a82b9a02ff90ad1f_Associate_prof_one.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "dabd7fac-a52c-42b5-b5d2-060b2eb18915",
@@ -275,7 +275,7 @@
             "uploads/locations/b2c972be1a4e449a8971cca9dda31ce9_Associate_prof_V.jpg"
         ],
         "url": "uploads/locations/b2c972be1a4e449a8971cca9dda31ce9_Associate_prof_V.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "5883667c-41ad-4831-b7fd-f71f4a790443",
@@ -304,13 +304,14 @@
             "uploads/locations/294daeb5f5a84321bf357e24f243723e_ICT_director.jpg"
         ],
         "url": "uploads/locations/294daeb5f5a84321bf357e24f243723e_ICT_director.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "b6880b04-bd4b-42c0-9777-72d1f79b8ac5",
         "keywords": [
             [
-                "Claudine Mae",
+                "Claudine",
+                "Mae",
                 "Leysa"
             ],
             [
@@ -345,7 +346,7 @@
             "uploads/locations/bd84cc3aa5534af787187831b1edec88_Instructor_three.jpg"
         ],
         "url": "uploads/locations/bd84cc3aa5534af787187831b1edec88_Instructor_three.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "1713a87b-e5be-4953-8f59-ae36c240cbc9",
@@ -386,13 +387,14 @@
             "uploads/locations/1ca5f1370cd7433b947af5b62ab281b6_Job_order.jpg"
         ],
         "url": "uploads/locations/1ca5f1370cd7433b947af5b62ab281b6_Job_order.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "a89d1702-f73c-419d-873c-e7e97983c13b",
         "keywords": [
             [
-                "Mark daniel",
+                "Mark",
+                "daniel",
                 "Ramos"
             ],
             [
@@ -421,7 +423,7 @@
             "uploads/locations/820603a5478e4d26a17b8d4e66464666_Part_time_1.jpg"
         ],
         "url": "uploads/locations/820603a5478e4d26a17b8d4e66464666_Part_time_1.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "3871239b-7812-40ea-8345-d5a65eb616a1",
@@ -456,7 +458,7 @@
             "uploads/locations/657a99a7446d478483b137909ed2940d_Part_time_2.jpg"
         ],
         "url": "uploads/locations/657a99a7446d478483b137909ed2940d_Part_time_2.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "686ac525-7c7b-44d0-a9b2-1b20ba9cb1b4",
@@ -491,7 +493,7 @@
             "uploads/locations/247c7e1bfc874ecabd4d96c8972e00a6_Part_time_3.jpg"
         ],
         "url": "uploads/locations/247c7e1bfc874ecabd4d96c8972e00a6_Part_time_3.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "428a7e21-774f-4bb6-beaf-479ddc6ec41b",
@@ -526,7 +528,7 @@
             "uploads/locations/87c0d683c1ae457c8e89357fb17b789e_Part_time_4.jpg"
         ],
         "url": "uploads/locations/87c0d683c1ae457c8e89357fb17b789e_Part_time_4.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "c025da6d-ab12-41a6-b747-78b251468f4f",
@@ -597,7 +599,7 @@
             "uploads/locations/8234b53f6bb24d7a8823f94426fbcf35_Part_time_6.jpg"
         ],
         "url": "uploads/locations/8234b53f6bb24d7a8823f94426fbcf35_Part_time_6.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "a3485017-6f9a-4bce-951c-59d338682da0",
@@ -632,7 +634,7 @@
             "uploads/locations/022cb7523a3a476289929e9c820407f6_Part_time.jpg"
         ],
         "url": "uploads/locations/022cb7523a3a476289929e9c820407f6_Part_time.jpg",
-        "user_type": "user"
+        "user_type": "both"
     },
     {
         "id": "6dffcbd2-df4f-4cac-baf6-2ebffcb6fdb0",
