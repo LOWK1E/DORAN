@@ -1184,6 +1184,8 @@ def add_rule():
 
     try:
         added_id = chatbot.add_rule(question, response, user_type=user_type, category=category)
+        # Reload rules to reflect changes in running app
+        chatbot.reload_rules()
         return jsonify({'status': 'success', 'id': added_id})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
@@ -1209,6 +1211,8 @@ def edit_rule():
     try:
         edited = chatbot.edit_rule(rule_id, question, response, user_type=user_type)
         if edited:
+            # Reload rules to reflect changes in running app
+            chatbot.reload_rules()
             return jsonify({'status': 'success'})
         else:
             return jsonify({'status': 'error', 'message': 'Rule not found'})
