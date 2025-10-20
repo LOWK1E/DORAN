@@ -21,7 +21,6 @@ COPY htdocs/ ./htdocs/
 COPY static/css/ ./static/css/
 COPY static/js/ ./static/js/
 COPY static/media/ ./static/media/
-# COPY static/uploads/ ./static/uploads/ 2>/dev/null || true
 # Create empty directories for uploads (will be created at runtime if needed)
 RUN mkdir -p static/uploads/locations static/uploads/visuals
 
