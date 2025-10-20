@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             },
                             body: JSON.stringify({
                                 rule_id: capturedRuleId,
-                                question: newKeywords,
+                                keywords: newKeywords,
                                 response: newResponse,
                                 user_type: user_type
                             }),
