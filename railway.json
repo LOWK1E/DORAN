@@ -4,7 +4,6 @@
     "dockerfilePath": "./Dockerfile"
   },
   "deploy": {
-    "startCommand": "gunicorn app:app",
-    "preDeployCommand": "python init_db.py"
+    "startCommand": "gunicorn app:app"
   }
 }
