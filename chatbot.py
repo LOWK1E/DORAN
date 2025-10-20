@@ -477,8 +477,6 @@ class Chatbot:
                                 best_similarity = matches
                                 best_match = rule
 
-        # Semantic rules not used with NLTK
-
         if best_match:
             self.consecutive_fallbacks = 0
             return self.append_image_to_response(best_match['response'])
@@ -486,15 +484,16 @@ class Chatbot:
         # Check regular rules (user/guest rules) with semantic similarity
         regular_rules = [rule for rule in rules_to_use if rule.get('category') not in ['locations', 'visuals']]
         if regular_rules:
-            rule_questions = [rule['question'] for rule in regular_rules]
-            rule_answers = [rule['response'] for rule in regular_rules]
+            questions = [rule['question'] for rule in regular_rules]
 
-            best_question, similarity_score = semantic_similarity(user_input, rule_questions)
-            SIMILARITY_THRESHOLD = 0.8
+            # Use semantic similarity to find the best match
+            best_question, similarity_score = semantic_similarity(user_input, questions)
+            SIMILARITY_THRESHOLD = 0.6  # Threshold for matching
             if similarity_score >= SIMILARITY_THRESHOLD:
-                index = rule_questions.index(best_question)
-                response = rule_answers[index]
-                return self.append_image_to_response(response)
+                index = questions.index(best_question)
+                best_match = regular_rules[index]
+                self.consecutive_fallbacks = 0
+                return self.append_image_to_response(best_match['response'])
 
         # Check for email queries
         email_response = self.search_emails(user_input)
@@ -816,6 +815,13 @@ class Chatbot:
         Reload visual rules from database/visuals/visuals.json into memory.
         """
         self.visual_rules = self.get_visual_rules()
+
+    def reload_rules(self):
+        """
+        Reload user and guest rules from JSON files into memory.
+        """
+        self.rules = self.get_rules()
+        self.guest_rules = self.get_guest_rules()
 
     def recompute_embeddings(self):
         """

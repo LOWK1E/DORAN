@@ -211,7 +211,7 @@
         },
         {
             "question": "What are the office hours of SOBM?",
-            "answer": "contact our facebook page(link),",
+            "answer": "SOBM office hours are from 8:00 AM to 5:00 PM, Monday to Friday.",
             "id": "c765d983-b213-4626-86b6-09983b881a83"
         },
         {
@@ -328,6 +328,11 @@
             "question": "What events are held annually in SOBM?",
             "answer": "on SOBM Only Convocation program",
             "id": "b80ddfb5-942c-4889-9df5-08aade463aea"
+        },
+        {
+            "question": "What is the Mission and Vision of School of business and management,SOBM,Bachelor of science in hospitality management BSHM",
+            "answer": "Provide education and training in the hospitality,tourism,and resturant business. Broaden the acess of deserving and qualified/youths to the program in response to the national development needs. Enhance the dissemination of knowledge, skills, and technology in the hotel and restaurant occupation. Establish linkages with hotels, restaurants, and other hospitality or allied institutions in the local, regional, national and international levels. Develop entrepreneurial competencies that will lead to self-employment. and Equip students with skills for administrative and supervisory manpower of the industries in hotels/restaurants and other allied institutions.",
+            "id": "9d907acc-9b14-431b-bb74-3d733b07fd12"
         }
     ],
     "Registrar": [

@@ -21,7 +21,7 @@ def init_database():
         if not Admin.query.filter_by(email='admin@wvsu.edu.ph').first():
             admin = Admin(
                 email='admin@wvsu.edu.ph',
-                password_hash=generate_password_hash('admin123')
+                Password_hash=generate_password_hash('admin123')  # Note: capital P for MySQL
             )
             db.session.add(admin)
             db.session.commit()

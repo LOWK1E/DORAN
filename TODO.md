@@ -1,13 +1,10 @@
-# TODO: Implement Add, Edit, Delete Rules in Admin Panel
+# TODO: Update Preprocessed Questions Modal
 
-## Completed Tasks
-- [x] Add edit_rule method to chatbot.py to modify JSON files for user/guest rules
-- [x] Add delete_rule method to chatbot.py to remove rules from JSON files
-- [x] Add /add_rule route to app.py that calls chatbot.add_rule
-- [x] Add /edit_rule route to app.py that calls chatbot.edit_rule
-- [x] Add /delete_rule route to app.py that calls chatbot.delete_rule
-
-## Followup Steps
-- [ ] Test the routes by running the app and using the admin panel to add, edit, and delete rules
-- [ ] Verify that rules are correctly saved to all_user_rules.json and all_guest_rules.json
-- [ ] Ensure embeddings are recomputed after edits/deletes for semantic matching
+## Steps to Complete:
+- [ ] Add preprocessText function in chat.js to preprocess text (lowercase, remove stopwords and punctuation).
+- [ ] Change fetch URLs: '/database/preprocessed_guest_rules.json' to '/database/guest_database/all_guest_rules.json', '/database/user_rules.json' to '/database/user_database/all_user_rules.json'.
+- [ ] Modify code for guestRules and userRules to set original: rule.question, preprocessed: preprocessText(rule.question).
+- [ ] For faqs categorization, push {original: faq.question, preprocessed: preprocessText(faq.question)} instead of the string.
+- [ ] For locations, push {original: displayText, preprocessed: preprocessText(displayText)}.
+- [ ] Test the modal to ensure all questions from the specified files are displayed as preprocessed.
+- [ ] Verify no console errors and modal functionality.

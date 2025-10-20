@@ -1,3 +1,13 @@
+function preprocessText(text) {
+    // Simple preprocessing: lowercase, remove punctuation, remove common stopwords
+    const stopwords = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their', 'this', 'that', 'these', 'those'];
+    return text.toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+        .split(' ')
+        .filter(word => word && !stopwords.includes(word))
+        .join(' ');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Generate or retrieve session_id
     let currentSessionId = sessionStorage.getItem('chat_session_id');
@@ -5,6 +15,89 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSessionId = crypto.randomUUID();
         sessionStorage.setItem('chat_session_id', currentSessionId);
     }
+
+    // Load categories and FAQs to categorize questions
+    let categories = [];
+    let faqs = [];
+    let questionCategories = {};
+
+    // Fetch all rules and locations for categories
+    Promise.all([
+        fetch('/database/guest_database/all_guest_rules.json').then(r => r.json()),
+        fetch('/database/user_database/all_user_rules.json').then(r => r.json()),
+        fetch('/database/locations/locations.json').then(r => r.json()),
+        fetch('/database/faqs.json').then(r => r.json())
+    ])
+        .then(([guestRules, userRules, locations, faqsData]) => {
+            faqs = faqsData;
+            categories = Object.keys(guestRules); // ["SOICT", "SOIT", "SOBM", "Registrar", "Faculty", "SOED"]
+            categories.push("Locations", "Faculties"); // Add additional categories
+            // Initialize questionCategories with categories
+            categories.forEach(cat => {
+                questionCategories[cat] = [];
+            });
+            questionCategories["General"] = []; // Add General for uncategorized
+
+            // Add questions from guest rules
+            Object.keys(guestRules).forEach(cat => {
+                guestRules[cat].forEach(rule => {
+                    questionCategories[cat].push({
+                        original: rule.question,
+                        preprocessed: preprocessText(rule.question)
+                    });
+                });
+            });
+
+            // Add questions from user rules
+            Object.keys(userRules).forEach(cat => {
+                userRules[cat].forEach(rule => {
+                    questionCategories[cat].push({
+                        original: rule.question,
+                        preprocessed: preprocessText(rule.question)
+                    });
+                });
+            });
+
+            // Add location questions
+            locations.forEach(loc => {
+                loc.keywords.forEach(kw => {
+                    const displayText = "Where is " + kw.join(" ") + "?";
+                    questionCategories["Locations"].push({
+                        original: displayText,
+                        preprocessed: preprocessText(displayText)
+                    });
+                });
+            });
+
+            // Categorize FAQs based on keywords in questions
+            faqs.forEach(faq => {
+                const question = faq.question.toLowerCase();
+                let categorized = false;
+                categories.forEach(cat => {
+                    if (question.includes(cat.toLowerCase())) {
+                        questionCategories[cat].push({
+                            original: faq.question,
+                            preprocessed: preprocessText(faq.question)
+                        });
+                        categorized = true;
+                    }
+                });
+                if (!categorized) {
+                    questionCategories["General"].push({
+                        original: faq.question,
+                        preprocessed: preprocessText(faq.question)
+                    });
+                }
+            });
+
+            // Now initialize the modal after data is loaded
+            initializeQuestionsModal();
+        })
+        .catch(error => {
+            console.error('Error loading data:', error);
+            // Fallback to empty modal or default
+            initializeQuestionsModal();
+        });
 
     const dayHeaders = document.querySelectorAll('.history-day-header');
     dayHeaders.forEach(header => {
@@ -393,4 +486,95 @@ async function loadHistoryForSession(sessionId) {
     }
 
     initializeImageModal();
+
+    // Function to initialize the questions modal
+    function initializeQuestionsModal() {
+        if (!document.querySelector('.questions-modal')) {
+            const modalHTML = `
+                <div class="questions-modal" id="questionsModal">
+                    <div class="questions-modal-content">
+                        <span class="questions-close">&times;</span>
+                        <h5>Preprocessed Questions</h5>
+                        <div class="questions-dropdowns">
+                            <select id="categorySelect" class="form-select mb-3">
+                                <option value="">Select Category</option>
+                            </select>
+                            <div id="questionButtons" class="questions-content">
+                                <!-- Questions will be populated here as buttons -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        const modal = document.getElementById('questionsModal');
+        const closeBtn = modal.querySelector('.questions-close');
+        const categorySelect = document.getElementById('categorySelect');
+        const questionButtons = document.getElementById('questionButtons');
+
+        // Populate category dropdown
+        categorySelect.innerHTML = '<option value="">Select Category</option>';
+        Object.keys(questionCategories).forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            categorySelect.appendChild(option);
+        });
+
+        // Event listener for category change
+        categorySelect.addEventListener('change', () => {
+            const selectedCategory = categorySelect.value;
+            questionButtons.innerHTML = '';
+            if (selectedCategory && questionCategories[selectedCategory]) {
+                questionCategories[selectedCategory].forEach(question => {
+                    const btn = document.createElement('button');
+                    btn.className = 'questions-btn';
+                    // Use preprocessed question if available, else original, else the question itself
+                    const displayText = typeof question === 'string' ? question : (question.preprocessed || question.original);
+                    btn.textContent = displayText;
+                    btn.addEventListener('click', () => {
+                        sendMessage(displayText);
+                        modal.style.display = 'none';
+                        // Reset category dropdown
+                        categorySelect.value = '';
+                        questionButtons.innerHTML = '';
+                    });
+                    questionButtons.appendChild(btn);
+                });
+            }
+        });
+
+        // Add button to sidebar to open modal (only for authenticated users with sidebar)
+        const sidebarHeader = document.querySelector('.sidebar-header');
+        if (sidebarHeader && !document.querySelector('#open-questions-btn')) {
+            const openBtn = document.createElement('button');
+            openBtn.id = 'open-questions-btn';
+            openBtn.className = 'btn btn-primary btn-sm ms-2';
+            openBtn.innerHTML = '<i class="fas fa-question-circle"></i> Questions';
+            openBtn.title = 'Open Preprocessed Questions';
+            openBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+            sidebarHeader.appendChild(openBtn);
+        }
+
+        // Add button for guests (non-sidebar users)
+        const guestBtn = document.getElementById('open-questions-btn');
+        if (guestBtn) {
+            guestBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+        }
+
+        // Close modal
+        closeBtn.onclick = () => { modal.style.display = 'none'; };
+        modal.onclick = e => { if (e.target === modal) { modal.style.display = 'none'; }};
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        });
+    }
 });

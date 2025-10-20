@@ -104,6 +104,90 @@ def favicon():
     """
     return '', 204
 
+@app.route('/database/categories.json')
+def get_categories_json():
+    """
+    Serve categories.json file.
+    """
+    import os
+    categories_path = os.path.join(app.root_path, 'database', 'categories.json')
+    try:
+        with open(categories_path, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        app.logger.error(f"Failed to load categories.json: {e}")
+        return jsonify([])
+
+@app.route('/database/faqs.json')
+def get_faqs_json():
+    """
+    Serve faqs.json file.
+    """
+    import os
+    faqs_path = os.path.join(app.root_path, 'database', 'faqs.json')
+    try:
+        with open(faqs_path, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        app.logger.error(f"Failed to load faqs.json: {e}")
+        return jsonify([])
+
+@app.route('/database/locations/locations.json')
+def get_locations_json():
+    """
+    Serve locations.json file.
+    """
+    import os
+    locations_path = os.path.join(app.root_path, 'database', 'locations', 'locations.json')
+    try:
+        with open(locations_path, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        app.logger.error(f"Failed to load locations.json: {e}")
+        return jsonify([])
+
+@app.route('/database/guest_rules.json')
+def get_guest_rules_json():
+    """
+    Serve all_guest_rules.json file.
+    """
+    import os
+    rules_path = os.path.join(app.root_path, 'database', 'guest_database', 'all_guest_rules.json')
+    try:
+        with open(rules_path, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        app.logger.error(f"Failed to load guest_rules.json: {e}")
+        return jsonify({})
+
+@app.route('/database/user_rules.json')
+def get_user_rules_json():
+    """
+    Serve all_user_rules.json file.
+    """
+    import os
+    rules_path = os.path.join(app.root_path, 'database', 'user_database', 'all_user_rules.json')
+    try:
+        with open(rules_path, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        app.logger.error(f"Failed to load user_rules.json: {e}")
+        return jsonify({})
+
+@app.route('/database/preprocessed_guest_rules.json')
+def get_preprocessed_guest_rules_json():
+    """
+    Serve preprocessed_guest_rules.json file.
+    """
+    import os
+    rules_path = os.path.join(app.root_path, 'database', 'preprocessed_guest_rules.json')
+    try:
+        with open(rules_path, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        app.logger.error(f"Failed to load preprocessed_guest_rules.json: {e}")
+        return jsonify({})
+
 @app.route('/welcome')
 def welcome_api():
     """
@@ -219,13 +303,10 @@ def signup():
             flash('Username already taken. Please choose another.', 'danger')
             return render_template('signup.html')
 
-        # Create user with is_confirmed=False
+        # Create user (no confirmation needed in MySQL schema)
         user = user_manager.create_user(username, email, password, 'user')
-        # Set is_confirmed to False explicitly (in case create_user does not set it)
-        user.is_confirmed = False
-        user_manager.db.session.commit()
 
-        flash('Account created! Please wait for admin confirmation before logging in.', 'info')
+        flash('Account created successfully! You can now log in.', 'success')
         return redirect(url_for('login', user_type='user'))
 
     return render_template('signup.html')
@@ -1184,6 +1265,8 @@ def add_rule():
 
     try:
         added_id = chatbot.add_rule(question, response, user_type=user_type, category=category)
+        # Reload rules to reflect changes in running app
+        chatbot.reload_rules()
         return jsonify({'status': 'success', 'id': added_id})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
@@ -1209,6 +1292,8 @@ def edit_rule():
     try:
         edited = chatbot.edit_rule(rule_id, question, response, user_type=user_type)
         if edited:
+            # Reload rules to reflect changes in running app
+            chatbot.reload_rules()
             return jsonify({'status': 'success'})
         else:
             return jsonify({'status': 'error', 'message': 'Rule not found'})
@@ -1240,17 +1325,91 @@ def delete_rule():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
 
-@app.route('/add_category', methods=['POST'])
+@app.route('/get_categories')
 @login_required
-def add_category():
+def get_categories():
     """
-    Add a new category (placeholder).
+    Get all available categories for rules.
     """
     if not is_admin(current_user):
         return jsonify({'status': 'error', 'message': 'Unauthorized access'})
 
-    # Placeholder implementation
-    return jsonify({'status': 'success'})
+    try:
+        from database.user_database import rule_utils
+        # Get categories from both user and guest files
+        user_data = rule_utils.load_combined_file(rule_utils.USER_COMBINED_FILE)
+        guest_data = rule_utils.load_combined_file(rule_utils.GUEST_COMBINED_FILE)
+
+        user_categories = list(user_data.keys())
+        guest_categories = list(guest_data.keys())
+
+        # Combine and deduplicate
+        all_categories = list(set(user_categories + guest_categories))
+
+        return jsonify({'status': 'success', 'categories': all_categories})
+    except Exception as e:
+        app.logger.error(f"Error getting categories: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to load categories'})
+
+@app.route('/add_category', methods=['POST'])
+@login_required
+def add_category():
+    """
+    Add a new category for rules.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    data = request.get_json()
+    category_name = data.get('category_name', '').strip()
+
+    if not category_name:
+        return jsonify({'status': 'error', 'message': 'Category name is required'})
+
+    try:
+        from database.user_database import rule_utils
+        # Add category to both user and guest databases
+        added = rule_utils.add_empty_category(category_name, user_type='both')
+
+        if added:
+            # Reload chatbot rules to reflect changes
+            chatbot.reload_rules()
+            return jsonify({'status': 'success', 'message': f'Category "{category_name}" added successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': f'Category "{category_name}" already exists'})
+    except Exception as e:
+        app.logger.error(f"Error adding category: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to add category'})
+
+@app.route('/remove_category', methods=['POST'])
+@login_required
+def remove_category():
+    """
+    Remove a category and all its rules.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    data = request.get_json()
+    category_name = data.get('category_name', '').strip()
+
+    if not category_name:
+        return jsonify({'status': 'error', 'message': 'Category name is required'})
+
+    try:
+        from database.user_database import rule_utils
+        # Remove category from both user and guest databases
+        removed = rule_utils.remove_category(category_name, user_type='both')
+
+        if removed:
+            # Reload chatbot rules to reflect changes
+            chatbot.reload_rules()
+            return jsonify({'status': 'success', 'message': f'Category "{category_name}" and all its rules removed successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': f'Category "{category_name}" not found'})
+    except Exception as e:
+        app.logger.error(f"Error removing category: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to remove category'})
 
 if __name__ == '__main__':
     app.run(debug=True)

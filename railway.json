@@ -4,7 +4,7 @@
     "buildCommand": "pip install -r requirements.txt"
   },
   "deploy": {
-    "startCommand": "python init_db.py && gunicorn app:app",
+    "startCommand": "gunicorn app:app",
     "preDeployCommand": "python init_db.py"
   }
 }

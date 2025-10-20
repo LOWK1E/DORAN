@@ -37,8 +37,8 @@ class UserManager:
             AdminModel or None: Admin object if found.
         """
         return AdminModel.query.filter_by(email=email).first()
-    
-    def create_user(self, username, email, password, role):
+
+    def create_user(self, username, email, password, role='user'):
         """
         Create a new user and store it in the database.
 
@@ -46,16 +46,16 @@ class UserManager:
             username (str): Username.
             email (str): Email address.
             password (str): Password.
-            role (str): User role.
+            role (str): User role (ignored in MySQL schema).
 
         Returns:
             UserModel: Created user object.
         """
-        user = UserModel(username=username, email=email, role=role)
+        user = UserModel(username=username, email=email)
         user.set_password(password)
         self.db.session.add(user)
         self.db.session.commit()
-        logging.debug(f"Created user: {email} with role: {role}")
+        logging.debug(f"Created user: {email}")
         return user
 
     def create_admin(self, email, password):
@@ -75,7 +75,7 @@ class UserManager:
         self.db.session.commit()
         logging.debug(f"Created admin: {email}")
         return admin
-    
+
     def get_user_by_id(self, user_id):
         """
         Get a user by their ID.
@@ -87,7 +87,7 @@ class UserManager:
             UserModel or None: User object if found.
         """
         return UserModel.query.get(int(user_id))
-    
+
     def get_user_by_email(self, email):
         """
         Get a user by their email.
@@ -99,7 +99,7 @@ class UserManager:
             UserModel or None: User object if found.
         """
         return UserModel.query.filter_by(email=email).first()
-    
+
     def get_user_by_username(self, username):
         """
         Get a user by their username.
@@ -111,7 +111,7 @@ class UserManager:
             UserModel or None: User object if found.
         """
         return UserModel.query.filter_by(username=username).first()
-    
+
     def add_chat_message(self, user_id, session_id, sender_type, message):
         """
         Add a message to a user's chat history.
@@ -123,10 +123,16 @@ class UserManager:
             message (str): Message content.
         """
         from models import ChatMessage
-        chat_message = ChatMessage(user_id=user_id, session_id=session_id, sender_type=sender_type, message=message)
+        chat_message = ChatMessage(
+            user_id=str(user_id),  # Convert to string for MySQL varchar
+            session_id=session_id,
+            Sender_type=sender_type,  # Capital S
+            message=message,
+            timestamp=datetime.utcnow()
+        )
         self.db.session.add(chat_message)
         self.db.session.commit()
-    
+
     def get_chat_history(self, user_id):
         """
         Get a user's chat history grouped by session.
@@ -138,7 +144,7 @@ class UserManager:
             dict: Sessions with title and messages.
         """
         from models import ChatMessage
-        messages = ChatMessage.query.filter_by(user_id=user_id).order_by(ChatMessage.timestamp.asc()).all()
+        messages = ChatMessage.query.filter_by(user_id=str(user_id)).order_by(ChatMessage.timestamp.asc()).all()
 
         sessions = {}
         for msg in messages:
@@ -149,10 +155,10 @@ class UserManager:
                     'messages': [],
                     'timestamp': msg.timestamp
                 }
-            if sessions[session_id]['title'] is None and msg.sender_type == 'user':
+            if sessions[session_id]['title'] is None and msg.Sender_type == 'user':
                 sessions[session_id]['title'] = msg.message
             sessions[session_id]['messages'].append({
-                'sender': msg.sender_type,
+                'sender': msg.Sender_type,
                 'message': msg.message,
                 'timestamp': msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
             })
@@ -171,7 +177,7 @@ class UserManager:
             list: List of session summaries.
         """
         from models import ChatMessage
-        messages = ChatMessage.query.filter_by(user_id=user_id).order_by(ChatMessage.timestamp.asc()).all()
+        messages = ChatMessage.query.filter_by(user_id=str(user_id)).order_by(ChatMessage.timestamp.asc()).all()
 
         sessions = {}
         for msg in messages:
@@ -182,7 +188,7 @@ class UserManager:
                     'title': None,
                     'timestamp': msg.timestamp
                 }
-            if sessions[session_id]['title'] is None and msg.sender_type == 'user':
+            if sessions[session_id]['title'] is None and msg.Sender_type == 'user':
                 sessions[session_id]['title'] = msg.message
         # Sort by timestamp descending
         sorted_sessions = sorted(sessions.values(), key=lambda x: x['timestamp'], reverse=True)
@@ -200,19 +206,19 @@ class UserManager:
             dict: Session data with messages.
         """
         from models import ChatMessage
-        messages = ChatMessage.query.filter_by(user_id=user_id, session_id=session_id).order_by(ChatMessage.timestamp.asc()).all()
+        messages = ChatMessage.query.filter_by(user_id=str(user_id), session_id=session_id).order_by(ChatMessage.timestamp.asc()).all()
 
         session_data = {
             'messages': []
         }
         for msg in messages:
             session_data['messages'].append({
-                'sender': msg.sender_type,
+                'sender': msg.Sender_type,
                 'message': msg.message,
                 'timestamp': msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
             })
         return session_data
-    
+
     def clear_chat_history(self, user_id):
         """
         Clear a user's chat history.
@@ -221,34 +227,29 @@ class UserManager:
             user_id (int): User ID.
         """
         from models import ChatMessage
-        ChatMessage.query.filter_by(user_id=user_id).delete()
+        ChatMessage.query.filter_by(user_id=str(user_id)).delete()
         self.db.session.commit()
 
     def get_pending_users(self):
         """
-        Get all users who are not confirmed yet.
+        Get all users (since no is_confirmed in MySQL schema, return empty list).
 
         Returns:
-            list: List of pending User objects.
+            list: Empty list.
         """
-        return UserModel.query.filter_by(is_confirmed=False).all()
+        return []  # No pending users concept in MySQL schema
 
     def confirm_user(self, user_id):
         """
-        Confirm a user's account.
+        Confirm a user's account (no-op since no is_confirmed).
 
         Args:
             user_id (int): User ID.
 
         Returns:
-            bool: True if confirmed, False if user not found.
+            bool: Always True.
         """
-        user = UserModel.query.get(user_id)
-        if user:
-            user.is_confirmed = True
-            self.db.session.commit()
-            return True
-        return False
+        return True
 
     def reject_user(self, user_id):
         """
@@ -280,7 +281,7 @@ class UserManager:
         """
         from models import ChatMessage
         try:
-            ChatMessage.query.filter_by(user_id=user_id, session_id=session_id).delete()
+            ChatMessage.query.filter_by(user_id=str(user_id), session_id=session_id).delete()
             self.db.session.commit()
             return True
         except Exception as e:
