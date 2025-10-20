@@ -386,6 +386,69 @@ def admin_dashboard():
 
     return render_template('admin_dashboard.html', pending_accounts=pending_accounts, pending_feedbacks=pending_feedbacks)
 
+@app.route('/admin/feedback')
+@login_required
+def admin_feedback():
+    """
+    Render the admin feedback management page.
+    """
+    if not is_admin(current_user):
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('chat'))
+
+    from models import Feedback
+    feedbacks = Feedback.query.filter_by(is_done=False).order_by(Feedback.timestamp.desc()).all()
+
+    return render_template('admin_feedback.html', feedbacks=feedbacks)
+
+@app.route('/admin/feedback/mark_done', methods=['POST'])
+@login_required
+def mark_feedback_done():
+    """
+    Mark a feedback as done.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    data = request.get_json()
+    feedback_id = data.get('feedback_id')
+
+    if not feedback_id:
+        return jsonify({'status': 'error', 'message': 'Feedback ID is required'})
+
+    from models import Feedback
+    feedback = Feedback.query.get(feedback_id)
+    if not feedback:
+        return jsonify({'status': 'error', 'message': 'Feedback not found'})
+
+    feedback.is_done = True
+    db.session.commit()
+
+    return jsonify({'status': 'success'})
+
+@app.route('/admin/feedback/finished')
+@login_required
+def get_finished_feedback():
+    """
+    Get all finished feedback.
+    """
+    if not is_admin(current_user):
+        return jsonify({'status': 'error', 'message': 'Unauthorized access'})
+
+    from models import Feedback
+    finished_feedbacks = Feedback.query.filter_by(is_done=True).order_by(Feedback.timestamp.desc()).all()
+
+    feedback_list = []
+    for fb in finished_feedbacks:
+        feedback_list.append({
+            'id': fb.id,
+            'user_id': fb.user_id,
+            'message': fb.message,
+            'timestamp': fb.formatted_timestamp
+        })
+
+    return jsonify({'status': 'success', 'finished_feedback': feedback_list})
+
 @app.route('/admin/rules')
 @login_required
 def admin_rules():

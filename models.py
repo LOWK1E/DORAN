@@ -57,5 +57,10 @@ class Feedback(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     message = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    is_done = db.Column(db.Boolean, default=False, nullable=False)
 
     user = db.relationship('User', backref=db.backref('feedbacks', lazy=True))
+
+    @property
+    def formatted_timestamp(self):
+        return self.timestamp.strftime('%Y-%m-%d %H:%M:%S')

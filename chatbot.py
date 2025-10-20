@@ -483,6 +483,19 @@ class Chatbot:
             self.consecutive_fallbacks = 0
             return self.append_image_to_response(best_match['response'])
 
+        # Check regular rules (user/guest rules) with semantic similarity
+        regular_rules = [rule for rule in rules_to_use if rule.get('category') not in ['locations', 'visuals']]
+        if regular_rules:
+            rule_questions = [rule['question'] for rule in regular_rules]
+            rule_answers = [rule['response'] for rule in regular_rules]
+
+            best_question, similarity_score = semantic_similarity(user_input, rule_questions)
+            SIMILARITY_THRESHOLD = 0.8
+            if similarity_score >= SIMILARITY_THRESHOLD:
+                index = rule_questions.index(best_question)
+                response = rule_answers[index]
+                return self.append_image_to_response(response)
+
         # Check for email queries
         email_response = self.search_emails(user_input)
         if email_response:
