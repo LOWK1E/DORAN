@@ -20,7 +20,7 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')" 
     rm -rf /root/nltk_data/corpora/stopwords.zip /root/nltk_data/tokenizers/punkt.zip
 
 # Copy only necessary application files
-COPY app.py chatbot.py nlp_utils.py models.py user_management.py init_db.py ./
+COPY app.py chatbot.py nlp_utils.py models.py user_management.py init_db.py extensions.py ./
 COPY database/ ./database/
 COPY htdocs/ ./htdocs/
 COPY static/css/ ./static/css/
