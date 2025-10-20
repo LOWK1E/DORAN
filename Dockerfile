@@ -7,13 +7,12 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install system dependencies, Python packages, download NLTK data, and initialize database in one layer for faster build
+# Install system dependencies and Python packages in one layer for faster build
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --only-binary=all -r requirements.txt \
-    && python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')" \
-    && python init_db.py
+    && python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Copy only necessary application files
 COPY app.py chatbot.py nlp_utils.py models.py user_management.py init_db.py extensions.py ./
