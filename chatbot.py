@@ -827,6 +827,13 @@ class Chatbot:
         """
         self.visual_rules = self.get_visual_rules()
 
+    def reload_rules(self):
+        """
+        Reload user and guest rules from JSON files into memory.
+        """
+        self.rules = self.get_rules()
+        self.guest_rules = self.get_guest_rules()
+
     def recompute_embeddings(self):
         """
         Dummy method for compatibility. Does nothing since sentence transformers are not used.
