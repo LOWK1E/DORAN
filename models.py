@@ -9,6 +9,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Note: column name is 'password' in MySQL
+    is_confirmed = db.Column(db.Boolean, default=False, nullable=False)
 
     def set_password(self, password):
         self.password = generate_password_hash(password, method='pbkdf2:sha256')
