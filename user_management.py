@@ -232,24 +232,29 @@ class UserManager:
 
     def get_pending_users(self):
         """
-        Get all users (since no is_confirmed in MySQL schema, return empty list).
+        Get all unconfirmed users.
 
         Returns:
-            list: Empty list.
+            list: List of unconfirmed users.
         """
-        return []  # No pending users concept in MySQL schema
+        return UserModel.query.filter_by(is_confirmed=False).all()
 
     def confirm_user(self, user_id):
         """
-        Confirm a user's account (no-op since no is_confirmed).
+        Confirm a user's account.
 
         Args:
             user_id (int): User ID.
 
         Returns:
-            bool: Always True.
+            bool: True if confirmed, False if user not found.
         """
-        return True
+        user = UserModel.query.get(user_id)
+        if user:
+            user.is_confirmed = True
+            self.db.session.commit()
+            return True
+        return False
 
     def reject_user(self, user_id):
         """
