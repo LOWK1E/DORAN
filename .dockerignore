@@ -1,6 +1,5 @@
 # Exclude large static files that aren't needed for build
 static/uploads/
-static/media/
 database/locations/images/
 
 # Exclude development files
