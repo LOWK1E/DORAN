@@ -21,9 +21,9 @@ COPY htdocs/ ./htdocs/
 COPY static/css/ ./static/css/
 COPY static/js/ ./static/js/
 COPY static/media/ ./static/media/
-# Copy uploads directory if it exists (for existing uploaded content)
-RUN mkdir -p static/uploads/locations static/uploads/visuals && \
-    if [ -d static/uploads ]; then cp -r static/uploads/* ./static/uploads/ 2>/dev/null || true; fi
+
+# Create empty directories for uploads (will be created at runtime if needed)
+RUN mkdir -p static/uploads/locations static/uploads/visuals
 
 # Initialize the database
 RUN python init_db.py
