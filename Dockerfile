@@ -4,20 +4,13 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install only essential system dependencies
+# Install system dependencies, Python packages, download NLTK data, and initialize database in one layer for faster build
 RUN apt-get update && apt-get install -y \
     gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first for better caching
-COPY requirements.txt .
-
-# Install Python dependencies with minimal cache
-RUN pip install --no-cache-dir --only-binary=all -r requirements.txt
-
-# Pre-download NLTK data to avoid runtime downloads
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')" && \
-    rm -rf /root/nltk_data/corpora/stopwords.zip /root/nltk_data/tokenizers/punkt.zip
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --only-binary=all -r requirements.txt \
+    && python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')" \
+    && python init_db.py
 
 # Copy only necessary application files
 COPY app.py chatbot.py nlp_utils.py models.py user_management.py init_db.py extensions.py ./
@@ -28,9 +21,6 @@ COPY static/js/ ./static/js/
 COPY static/media/ ./static/media/
 # Create empty directories for uploads (will be created at runtime if needed)
 RUN mkdir -p static/uploads/locations static/uploads/visuals
-
-# Initialize database during build
-RUN python init_db.py
 
 # Expose port (Railway will override if needed)
 EXPOSE 8000
