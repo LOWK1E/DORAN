@@ -1,0 +1,21 @@
+# Exclude large static files that aren't needed for build
+static/uploads/
+static/media/
+database/locations/images/
+
+# Exclude development files
+*.pyc
+__pycache__/
+.git/
+.gitignore
+README.md
+.env
+.vscode/
+
+# Exclude test files if not needed
+test_*.py
+
+# Exclude unnecessary files
+*.log
+*.tmp
+.DS_Store
