@@ -24,6 +24,9 @@ COPY static/media/ ./static/media/
 # Create empty directories for uploads (will be created at runtime if needed)
 RUN mkdir -p static/uploads/locations static/uploads/visuals
 
+# Initialize the database
+RUN python init_db.py
+
 # Expose port (Railway will override if needed)
 EXPOSE 8000
 
