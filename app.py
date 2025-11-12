@@ -21,6 +21,7 @@ from user_management import UserManager
 from models import Admin, User as UserModel, LoginLog
 from extensions import db
 from database import email_directory
+from update_chatbot import ChatbotDB
 
 app = Flask(__name__)
 app.template_folder = 'htdocs'
@@ -60,6 +61,9 @@ with app.app_context():
     except Exception as e:
         app.logger.error(f"Error creating database tables: {str(e)}")
     user_manager = UserManager(db)
+
+# Initialize database connection for admin operations
+chatbot_db = ChatbotDB()
 
 chatbot = Chatbot()  # Rules are now loaded from soict.py automatically
 
@@ -509,14 +513,19 @@ def admin_faqs():
         flash('Unauthorized access', 'danger')
         return redirect(url_for('chat'))
 
-    import os
-    faqs_path = os.path.join(app.root_path, 'database', 'faqs.json')
     try:
-        with open(faqs_path, 'r', encoding='utf-8') as f:
-            faqs_list = json.load(f)
+        faqs_list = chatbot_db.get_faqs()
+        # Format for admin template
+        formatted_faqs = []
+        for faq in faqs_list:
+            formatted_faqs.append({
+                'question': faq.get('question', ''),
+                'answer': faq.get('answer', '')
+            })
+        faqs_list = formatted_faqs
     except Exception as e:
         faqs_list = []
-        app.logger.error(f"Failed to load faqs.json: {e}")
+        app.logger.error(f"Failed to load FAQs from database: {e}")
 
     return render_template('admin_faqs.html', info_list=faqs_list)
 
@@ -524,7 +533,7 @@ def admin_faqs():
 @login_required
 def add_info():
     """
-    Add a new FAQ entry to faqs.json.
+    Add a new FAQ entry to MySQL database.
     """
     if not is_admin(current_user):
         return jsonify({'status': 'error', 'message': 'Unauthorized access'})
@@ -536,23 +545,13 @@ def add_info():
     if not question or not answer:
         return jsonify({'status': 'error', 'message': 'Question and answer are required'})
 
-    import os
-    faqs_path = os.path.join(app.root_path, 'database', 'faqs.json')
     try:
-        with open(faqs_path, 'r', encoding='utf-8') as f:
-            faqs_list = json.load(f)
-    except Exception:
-        faqs_list = []
-
-    faqs_list.append({'question': question, 'answer': answer})
-
-    try:
-        with open(faqs_path, 'w', encoding='utf-8') as f:
-            json.dump(faqs_list, f, indent=4)
+        # Add to MySQL database
+        chatbot_db.add_faq({'question': question, 'answer': answer})
         # Reload FAQs in chatbot memory
         chatbot.reload_faqs()
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f'Failed to save FAQs: {str(e)}'})
+        return jsonify({'status': 'error', 'message': f'Failed to save FAQ: {str(e)}'})
 
     return jsonify({'status': 'success'})
 
@@ -560,7 +559,7 @@ def add_info():
 @login_required
 def edit_info():
     """
-    Edit an existing FAQ entry in faqs.json.
+    Edit an existing FAQ entry in MySQL database.
     """
     if not is_admin(current_user):
         return jsonify({'status': 'error', 'message': 'Unauthorized access'})
@@ -573,25 +572,11 @@ def edit_info():
     if info_id is None or not question or not answer:
         return jsonify({'status': 'error', 'message': 'ID, question, and answer are required'})
 
-    import os
-    faqs_path = os.path.join(app.root_path, 'database', 'faqs.json')
+    # Edit in MySQL database only
     try:
-        with open(faqs_path, 'r', encoding='utf-8') as f:
-            faqs_list = json.load(f)
-    except Exception:
-        faqs_list = []
-
-    if info_id < 0 or info_id >= len(faqs_list):
-        return jsonify({'status': 'error', 'message': 'Invalid FAQ ID'})
-
-    faqs_list[info_id]['question'] = question
-    faqs_list[info_id]['answer'] = answer
-
-    try:
-        with open(faqs_path, 'w', encoding='utf-8') as f:
-            json.dump(faqs_list, f, indent=4)
+        chatbot_db.edit_faq(info_id, {'question': question, 'answer': answer})
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f'Failed to save FAQs: {str(e)}'})
+        return jsonify({'status': 'error', 'message': f'Failed to save FAQ: {str(e)}'})
 
     return jsonify({'status': 'success'})
 
@@ -599,7 +584,7 @@ def edit_info():
 @login_required
 def delete_info():
     """
-    Delete an FAQ entry from faqs.json.
+    Delete an FAQ entry from faqs.json and MySQL database.
     """
     if not is_admin(current_user):
         return jsonify({'status': 'error', 'message': 'Unauthorized access'})
@@ -626,6 +611,8 @@ def delete_info():
     try:
         with open(faqs_path, 'w', encoding='utf-8') as f:
             json.dump(faqs_list, f, indent=4)
+        # Also delete from MySQL database
+        chatbot_db.delete_faq(info_id)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save FAQs: {str(e)}'})
 
@@ -661,21 +648,26 @@ def admin_existing_locations():
     """
     Render the admin existing locations page.
     """
-    import json
-    import os
-
     if not is_admin(current_user):
         flash('Unauthorized access', 'danger')
         return redirect(url_for('chat'))
 
-    # Load locations from database/locations/locations.json
-    locations_path = os.path.join(app.root_path, 'database', 'locations', 'locations.json')
     try:
-        with open(locations_path, 'r', encoding='utf-8') as f:
-            locations = json.load(f)
+        locations = chatbot_db.get_location_rules()
+        # Format for admin template - extract basic info
+        formatted_locations = []
+        for loc in locations:
+            formatted_locations.append({
+                'id': loc.get('id'),
+                'description': loc.get('description', ''),
+                'user_type': loc.get('user_type', 'both'),
+                'urls': loc.get('urls', []),
+                'url': loc.get('url', '')
+            })
+        locations = formatted_locations
     except Exception as e:
         locations = []
-        app.logger.error(f"Failed to load locations.json: {e}")
+        app.logger.error(f"Failed to load locations from database: {e}")
 
     return render_template('admin_existing_locations.html', locations=locations)
 
@@ -709,21 +701,26 @@ def admin_existing_visuals():
     """
     Render the admin existing visuals page.
     """
-    import json
-    import os
-
     if not is_admin(current_user):
         flash('Unauthorized access', 'danger')
         return redirect(url_for('chat'))
 
-    # Load visuals from database/visuals/visuals.json
-    visuals_path = os.path.join(app.root_path, 'database', 'visuals', 'visuals.json')
     try:
-        with open(visuals_path, 'r', encoding='utf-8') as f:
-            visuals = json.load(f)
+        visuals = chatbot_db.get_visual_rules()
+        # Format for admin template - extract basic info
+        formatted_visuals = []
+        for vis in visuals:
+            formatted_visuals.append({
+                'id': vis.get('id'),
+                'description': vis.get('description', ''),
+                'user_type': vis.get('user_type', 'both'),
+                'urls': vis.get('urls', []),
+                'url': vis.get('url', '')
+            })
+        visuals = formatted_visuals
     except Exception as e:
         visuals = []
-        app.logger.error(f"Failed to load visuals.json: {e}")
+        app.logger.error(f"Failed to load visuals from database: {e}")
 
     return render_template('admin_existing_visuals.html', visuals=visuals)
 
@@ -799,6 +796,16 @@ def add_location():
     try:
         with open(locations_path, 'w', encoding='utf-8') as f:
             json.dump(locations, f, indent=4)
+        # Also add to MySQL database
+        location_data = {
+            'id': new_location['id'],
+            'questions': new_location['questions'],
+            'description': new_location['description'],
+            'user_type': new_location['user_type'],
+            'urls': new_location['urls'],
+            'url': new_location['url']
+        }
+        chatbot_db.add_location(location_data)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save location: {str(e)}'})
 
@@ -894,6 +901,16 @@ def edit_location_with_id(location_id):
     try:
         with open(locations_path, 'w', encoding='utf-8') as f:
             json.dump(locations, f, indent=4)
+        # Also edit in MySQL database
+        location_data = {
+            'id': location_to_edit['id'],
+            'questions': location_to_edit['questions'],
+            'description': location_to_edit['description'],
+            'user_type': location_to_edit['user_type'],
+            'urls': location_to_edit['urls'],
+            'url': location_to_edit['url']
+        }
+        chatbot_db.edit_location(location_id, location_data)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save location: {str(e)}'})
 
@@ -934,6 +951,8 @@ def delete_location():
     try:
         with open(locations_path, 'w', encoding='utf-8') as f:
             json.dump(new_locations, f, indent=4)
+        # Also delete from MySQL database
+        chatbot_db.delete_location(location_id)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save locations: {e}'})
 
@@ -1014,6 +1033,16 @@ def add_visual():
     try:
         with open(visuals_path, 'w', encoding='utf-8') as f:
             json.dump(visuals, f, indent=4)
+        # Also add to MySQL database
+        visual_data = {
+            'id': new_visual['id'],
+            'questions': new_visual['questions'],
+            'description': new_visual['description'],
+            'user_type': new_visual['user_type'],
+            'urls': new_visual['urls'],
+            'url': new_visual['url']
+        }
+        chatbot_db.add_visual(visual_data)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save visual: {str(e)}'})
 
@@ -1112,6 +1141,16 @@ def edit_visual_with_id(visual_id):
     try:
         with open(visuals_path, 'w', encoding='utf-8') as f:
             json.dump(visuals, f, indent=4)
+        # Also edit in MySQL database
+        visual_data = {
+            'id': visual_to_edit['id'],
+            'questions': visual_to_edit['questions'],
+            'description': visual_to_edit['description'],
+            'user_type': visual_to_edit['user_type'],
+            'urls': visual_to_edit['urls'],
+            'url': visual_to_edit['url']
+        }
+        chatbot_db.edit_visual(visual_id, visual_data)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save visual: {str(e)}'})
 
@@ -1155,6 +1194,8 @@ def delete_visual():
     try:
         with open(visuals_path, 'w', encoding='utf-8') as f:
             json.dump(new_visuals, f, indent=4)
+        # Also delete from MySQL database
+        chatbot_db.delete_visual(visual_id)
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save visuals: {e}'})
 
